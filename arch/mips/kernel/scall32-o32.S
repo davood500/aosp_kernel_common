@@ -143,15 +143,29 @@ stackargs:
 	jr	t1
 	 addiu	t1, 6f - 5f
 
-2:	lw	t8, 28(t0)		# argument #8 from usp
-3:	lw	t7, 24(t0)		# argument #7 from usp
-4:	lw	t6, 20(t0)		# argument #6 from usp
-5:	jr	t1
+2:	.insn
+	lw	t8, 28(t0)		# argument #8 from usp
+3:	.insn
+	lw	t7, 24(t0)		# argument #7 from usp
+4:	.insn
+	lw	t6, 20(t0)		# argument #6 from usp
+5:	.insn
+	jr	t1
 	 sw	t5, 16(sp)		# argument #5 to ksp
 
+#ifdef CONFIG_CPU_MICROMIPS
+	## FIXME:
+	sw	t8, 28(sp)		# argument #8 to ksp
+	nop
+	sw	t7, 24(sp)		# argument #7 to ksp
+	nop
+	sw	t6, 20(sp)		# argument #6 to ksp
+	nop
+#else
 	sw	t8, 28(sp)		# argument #8 to ksp
 	sw	t7, 24(sp)		# argument #7 to ksp
 	sw	t6, 20(sp)		# argument #6 to ksp
+#endif
 6:	j	stack_done		# go back
 	 nop
 	.set	pop
@@ -496,7 +510,7 @@ einval:	li	v0, -ENOSYS
 	sys	sys_lookup_dcookie	4
 	sys	sys_epoll_create	1
 	sys	sys_epoll_ctl		4
-	sys	sys_epoll_wait		3	/* 4250 */
+	sys	sys_epoll_wait		4	/* 4250 */
 	sys	sys_remap_file_pages	5
 	sys	sys_set_tid_address	1
 	sys	sys_restart_syscall	0
@@ -589,6 +603,7 @@ einval:	li	v0, -ENOSYS
 	sys	sys_open_by_handle_at	3	/* 4340 */
 	sys	sys_clock_adjtime	2
 	sys	sys_syncfs		1
+	sys	sys_sendmmsg		4
 	sys	sys_setns		2
 	.endm
 

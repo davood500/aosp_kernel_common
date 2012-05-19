@@ -35,6 +35,11 @@ void (*local_flush_icache_range)(unsigned long start, unsigned long end);
 void (*__flush_cache_vmap)(void);
 void (*__flush_cache_vunmap)(void);
 
+void (*__flush_kernel_vmap_range)(unsigned long vaddr, int size);
+void (*__invalidate_kernel_vmap_range)(unsigned long vaddr, int size);
+
+EXPORT_SYMBOL_GPL(__flush_kernel_vmap_range);
+
 /* MIPS specific cache operations */
 void (*flush_cache_sigtramp)(unsigned long addr);
 void (*local_flush_data_cache_page)(void * addr);
@@ -74,12 +79,11 @@ SYSCALL_DEFINE3(cacheflush, unsigned long, addr, unsigned long, bytes,
 
 void __flush_dcache_page(struct page *page)
 {
-	struct address_space *mapping = page_mapping(page);
 	unsigned long addr;
 
 	if (PageHighMem(page))
 		return;
-	if (mapping && !mapping_mapped(mapping)) {
+	if (page_mapping(page) && !page_mapped(page)) {
 		SetPageDcacheDirty(page);
 		return;
 	}
@@ -91,6 +95,7 @@ void __flush_dcache_page(struct page *page)
 	 */
 	addr = (unsigned long) page_address(page);
 	flush_data_cache_page(addr);
+	ClearPageDcacheDirty(page);
 }
 
 EXPORT_SYMBOL(__flush_dcache_page);
@@ -106,8 +111,10 @@ void __flush_anon_page(struct page *page, unsigned long vmaddr)
 			kaddr = kmap_coherent(page, vmaddr);
 			flush_data_cache_page((unsigned long)kaddr);
 			kunmap_coherent();
-		} else
+		} else {
 			flush_data_cache_page(addr);
+			ClearPageDcacheDirty(page);
+		}
 	}
 }
 
@@ -124,11 +131,13 @@ void __update_cache(struct vm_area_struct *vma, unsigned long address,
 	if (unlikely(!pfn_valid(pfn)))
 		return;
 	page = pfn_to_page(pfn);
-	if (page_mapping(page) && Page_dcache_dirty(page)) {
+	if (page_mapped(page) && Page_dcache_dirty(page)) {
 		addr = (unsigned long) page_address(page);
-		if (exec || pages_do_alias(addr, address & PAGE_MASK))
+		if (exec || (cpu_has_dc_aliases &&
+		    pages_do_alias(addr, address & PAGE_MASK))) {
 			flush_data_cache_page(addr);
-		ClearPageDcacheDirty(page);
+			ClearPageDcacheDirty(page);
+		}
 	}
 }
 

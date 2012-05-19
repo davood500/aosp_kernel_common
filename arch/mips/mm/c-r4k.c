@@ -535,6 +535,8 @@ static void r4k_flush_cache_page(struct vm_area_struct *vma,
 	args.pfn = pfn;
 
 	r4k_on_each_cpu(local_r4k_flush_cache_page, &args);
+	if (cpu_has_dc_aliases)
+		ClearPageDcacheDirty(pfn_to_page(pfn));
 }
 
 static inline void local_r4k_flush_data_cache_page(void * addr)
@@ -716,6 +718,39 @@ static void r4k_flush_icache_all(void)
 {
 	if (cpu_has_vtag_icache)
 		r4k_blast_icache();
+}
+
+struct flush_kernel_vmap_range_args {
+	unsigned long	vaddr;
+	int		size;
+};
+
+static inline void local_r4k_flush_kernel_vmap_range(void *args)
+{
+	struct flush_kernel_vmap_range_args *vmra = args;
+	unsigned long vaddr = vmra->vaddr;
+	int size = vmra->size;
+
+	/*
+	 * Aliases only affect the primary caches so don't bother with
+	 * S-caches or T-caches.
+	 */
+	if (cpu_has_safe_index_cacheops && size >= dcache_size)
+		r4k_blast_dcache();
+	else {
+		R4600_HIT_CACHEOP_WAR_IMPL;
+		blast_dcache_range(vaddr, vaddr + size);
+	}
+}
+
+static void r4k_flush_kernel_vmap_range(unsigned long vaddr, int size)
+{
+	struct flush_kernel_vmap_range_args args;
+
+	args.vaddr = (unsigned long) vaddr;
+	args.size = size;
+
+	r4k_on_each_cpu(local_r4k_flush_kernel_vmap_range, &args);
 }
 
 static inline void rm7k_erratum31(void)
@@ -1015,16 +1050,40 @@ static void __cpuinit probe_pcache(void)
 	case CPU_R14000:
 		break;
 
+	case CPU_74K:
+		/*
+		 * Early versions of the 74k do not update
+		 * the cache tags on a vtag miss/ptag hit
+		 * which can occur in the case of KSEG0/KUSEG aliases
+		 * In this case it is better to treat the cache as always
+		 * having aliases
+		 */
+		if ((c->processor_id & 0xff) <= PRID_REV_ENCODE_332(2, 4, 0))
+			c->dcache.flags |= MIPS_CACHE_VTAG;
+		if ((c->processor_id & 0xff) == PRID_REV_ENCODE_332(2, 4, 0))
+			write_c0_config6(read_c0_config6() | MIPS_CONF6_SYND);
+		goto bypass1074;
+
+	case CPU_1074K:
+		if ((c->processor_id & 0xff) <= PRID_REV_ENCODE_332(1, 1, 0)) {
+			c->dcache.flags |= MIPS_CACHE_VTAG;
+			write_c0_config6(read_c0_config6() | MIPS_CONF6_SYND);
+		}
+		/* fall through */
+bypass1074:
+		;
+	case CPU_14K:
+	case CPU_14KE:
 	case CPU_24K:
 	case CPU_34K:
-	case CPU_74K:
 	case CPU_1004K:
-		if ((read_c0_config7() & (1 << 16))) {
+		if (read_c0_config7() & MIPS_CONF7_AR) {
 			/* effectively physically indexed dcache,
 			   thus no virtual aliases. */
 			c->dcache.flags |= MIPS_CACHE_PINDEX;
 			break;
 		}
+		/* fall through */
 	default:
 		if (c->dcache.waysize > PAGE_SIZE)
 			c->dcache.flags |= MIPS_CACHE_ALIASES;
@@ -1332,26 +1391,13 @@ static void __cpuinit coherency_setup(void)
 	}
 }
 
-#if defined(CONFIG_DMA_NONCOHERENT)
-
-static int __cpuinitdata coherentio;
-
-static int __init setcoherentio(char *str)
-{
-	coherentio = 1;
-
-	return 1;
-}
-
-__setup("coherentio", setcoherentio);
-#endif
-
 void __cpuinit r4k_cache_init(void)
 {
 	extern void build_clear_page(void);
 	extern void build_copy_page(void);
 	extern char __weak except_vec2_generic;
 	extern char __weak except_vec2_sb1;
+	extern int coherentio;
 	struct cpuinfo_mips *c = &current_cpu_data;
 
 	switch (c->cputype) {
@@ -1399,6 +1445,8 @@ void __cpuinit r4k_cache_init(void)
 	flush_cache_page	= r4k_flush_cache_page;
 	flush_cache_range	= r4k_flush_cache_range;
 
+	__flush_kernel_vmap_range = r4k_flush_kernel_vmap_range;
+
 	flush_cache_sigtramp	= r4k_flush_cache_sigtramp;
 	flush_icache_all	= r4k_flush_icache_all;
 	local_flush_data_cache_page	= local_r4k_flush_data_cache_page;
@@ -1420,8 +1468,10 @@ void __cpuinit r4k_cache_init(void)
 
 	build_clear_page();
 	build_copy_page();
-#if !defined(CONFIG_MIPS_CMP)
+
+	/* We want to run CMP kernels on core(s) with and without coherent caches */
+	/* Therefore can't use CONFIG_MIPS_CMP to decide to flush cache */
 	local_r4k___flush_cache_all(NULL);
-#endif
+
 	coherency_setup();
 }

@@ -315,7 +315,7 @@ EXPORT(sysn32_call_table)
 	PTR	sys_fremovexattr
 	PTR	sys_tkill
 	PTR	sys_ni_syscall
-	PTR	compat_sys_futex
+	PTR	sys_32_futex
 	PTR	compat_sys_sched_setaffinity	/* 6195 */
 	PTR	compat_sys_sched_getaffinity
 	PTR	sys_cacheflush
@@ -428,5 +428,6 @@ EXPORT(sysn32_call_table)
 	PTR	sys_open_by_handle_at
 	PTR	compat_sys_clock_adjtime	/* 6305 */
 	PTR	sys_syncfs
+	PTR	compat_sys_sendmmsg
 	PTR	sys_setns
 	.size	sysn32_call_table,.-sysn32_call_table
