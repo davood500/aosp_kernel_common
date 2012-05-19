@@ -9,7 +9,141 @@ menuconfig INPUT_TOUCHSCREEN
 
 	  If unsure, say Y.
 
-if INPUT_TOUCHSCREEN
+      if INPUT_TOUCHSCREEN
+############-ingenic-touchscreen-############
+
+config TOUCHSCREEN_XY_YX                                                                                                                                
+      tristate "touchscreen is used as vertical"
+      depends on INPUT_TOUCHSCREEN
+      help
+      touchscreen is used as vertical
+
+config TOUCHSCREEN_X_FLIP                                                                                                                                
+      tristate "touchscreen x axis flip"
+      depends on INPUT_TOUCHSCREEN
+      help
+      X axis flip for touchscreen.
+
+config TOUCHSCREEN_Y_FLIP
+      tristate "touchscreen y axis flip"
+      depends on INPUT_TOUCHSCREEN
+      help
+      Y axis flip for touchscreen.
+
+config TOUCHSCREEN_HD_LCM
+      tristate "touchscreen HD LCM"
+      depends on INPUT_TOUCHSCREEN
+      help
+      High-Definition screen for same size LCM 
+
+
+config TOUCHSCREEN_FT5X0X
+      tristate "Touchscreen ft5406"
+      depends on I2C
+      help
+      ft5306 a CTP controller,support panel 7"~8.9"
+
+config FT5X0X_MULTITOUCH
+		bool "Enable multi-touch on FocalTech FT5X0X "
+		depends on TOUCHSCREEN_FT5306 || TOUCHSCREEN_FT5X0X
+		default y
+		help
+			ft5306 or 5406 support multi-touch (two or five),
+			if you want , say Y here.
+
+comment "At least one of the touch point's number must be selected!"
+
+choice
+	prompt "FT5X06 TOUCH POINT NUMBER"
+	depends on FT5X0X_MULTITOUCH
+	default FT5X0X_MULTITOUCH_TWO_POINT
+	
+config FT5X0X_MULTITOUCH_TWO_POINT
+		bool "FT5x0x CTP SUPPORT TWO POINT "
+
+config FT5X0X_MULTITOUCH_FIVE_POINT
+		bool "FT5x0x CTP SUPPORT FIVE POINT"
+endchoice
+
+config TOUCHSCREEN_FT5X0X_TOUCH_KEY
+	tristate "Touchscreen ft5x0x has touch key"
+	depends on TOUCHSCREEN_FT5X0X
+	help
+	  ft5x0x  CTP touch key controller
+		  
+comment "At least one of the touch key'product name  must be selected!"
+
+choice
+	prompt "FT5X0x touch key product type"
+	default CONFIG_TOUCHKEY_INGENIC
+config FT5X0X_TOUCHKEY_INGENIC
+		bool "product: INGENIC (LINDEN)"
+			
+config FT5X0X_TOUCHKEY_JB01
+		bool "product: HaiWeiXun "
+
+config FT5X0X_TOUCHKEY_706
+		bool "product: YouYiYue(706) "
+endchoice
+
+config 	FT5406_SCREEN_1024x600
+		bool "software zoom in 800x480 to 1024x600 "
+		depends on TOUCHSCREEN_FT5X0X
+		default n
+		help
+			the screen normal size is 800*480, say Y here if you screen size is 1024x600.
+
+config 	FT5406_SWAP_XY
+		bool "swap x and y "
+		depends on TOUCHSCREEN_FT5306 || TOUCHSCREEN_FT5X0X
+		default n
+		help
+			say Y here if you need flip x y.
+		  
+config 	FT5X0X_DEBUG
+		bool "Enable FT5X0X TouchScreen driver Debug output"
+		depends on TOUCHSCREEN_FT5306 || TOUCHSCREEN_FT5X0X
+		default n
+		help
+			say Y here if you are trying to debug cft5306
+
+config TOUCHSCREEN_GOODIX
+	tristate "Touchscreen goodix (big screen)"
+	depends on I2C
+	help
+	  cdt-ctp-0975-045 a 1024*768 CTP controller
+
+config TOUCHSCREEN_GWTC9XXXB
+	tristate "Touchscreen GWTC9XXXB"
+	depends on I2C
+	help
+	  gwtc9xxxb a CTP controller
+
+config TOUCHSCREEN_JZ_GT801
+	tristate "Touchscreen GT801"
+	depends on I2C
+	help
+	  Ingenic touchscreen controller dricer with gt801
+
+config TOUCHSCREEN_JZ_GT801_MULTI_TOUCH
+	tristate "Gt801 mulit points touch"
+	depends on TOUCHSCREEN_JZ_GT801
+	help
+	  Ingenic touchscreen controller dricer with gt801
+	  gt801 support mulit points touch
+	  
+config TOUCHSCREEN_LDWZIC
+	tristate "Touchscreen LDWZIC"
+	depends on I2C
+	help
+	  LDWZIC a CTP controller
+config LDWZIC_MULTI_TOUCH
+	tristate "ldwzic mulit points touch"
+	depends on TOUCHSCREEN_LDWZIC
+	help
+	  ldwzic mulit points touch
+
+#############################################
 
 config TOUCHSCREEN_88PM860X
 	tristate "Marvell 88PM860x touchscreen"
@@ -678,6 +812,19 @@ config TOUCHSCREEN_TSC2007
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called tsc2007.
+config TOUCHSCREEN_AK4187
+	tristate "AK4187 based touchscreens"
+	depends on I2C
+	help
+	 Say Y here if you have a AK4187 based touchscreen.
+	 If unsure, say N.
+	 To compile this driver as a module, choose M here: the
+	 module will be called ak4187.
+
+config TOUCHSCREEN_CONCATENATE_REPORT
+	bool "AK4187 support concatenate report"
+	depends on TOUCHSCREEN_AK4187
+	help
 
 config TOUCHSCREEN_W90X900
 	tristate "W90P910 touchscreen driver"
@@ -697,6 +844,12 @@ config TOUCHSCREEN_PCAP
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called pcap_ts.
+
+config TOUCHSCREEN_CTP_IT7260
+        tristate "IT7260 TouchScreen driver"
+        depends on I2C
+        help
+          tablet_p2 IT7260 TouchSreen Driver implemented by Ingenic.
 
 config TOUCHSCREEN_ST1232
 	tristate "Sitronix ST1232 touchscreen controllers"

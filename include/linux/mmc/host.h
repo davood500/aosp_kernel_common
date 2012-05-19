@@ -296,6 +296,7 @@ struct mmc_host {
 	} embedded_sdio_data;
 #endif
 
+	unsigned int		capacity;
 	unsigned long		private[0] ____cacheline_aligned;
 };
 

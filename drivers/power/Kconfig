@@ -36,6 +36,28 @@ config MAX8925_POWER
 	  Say Y here to enable support for the battery charger in the Maxim
 	  MAX8925 PMIC.
 
+source "drivers/power/jz47xx_battery/Kconfig"
+
+config JZ_VOLTAGEM
+	tristate "battery voltage information"
+	depends on JZSOC
+	select SADC_JZ47XX
+	help
+	  show battery voltage information
+
+config PMU_ACT8600_SUPPORT
+	tristate "pmu act8600 support for ingenic soc"
+	help
+	  Say Y here to enable act8600 for power supply class
+	  and drivers.
+
+config ACT8600_HAS_CHARGE_LED
+	tristate "pmu act8600 support charge led for ingenic soc"
+	depends on PMU_ACT8600_SUPPORT
+	default n
+	help
+	  Say Y here to enable act8600 support charge led.
+ 	  	
 config WM831X_BACKUP
 	tristate "WM831X backup battery charger support"
 	depends on MFD_WM831X

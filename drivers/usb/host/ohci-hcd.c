@@ -953,7 +953,7 @@ static int ohci_restart (struct ohci_hcd *ohci)
 			/* FALLTHROUGH */
 		case ED_UNLINK:
 			break;
-		default:
+        default:
 			ohci_dbg(ohci, "bogus ed %p state %d\n",
 					ed, ed->state);
 		}
@@ -996,6 +996,11 @@ MODULE_LICENSE ("GPL");
 #ifdef CONFIG_PCI
 #include "ohci-pci.c"
 #define PCI_DRIVER		ohci_pci_driver
+#endif
+
+#ifdef CONFIG_JZSOC
+#include "ohci-jz.c"
+#define PLATFORM_DRIVER		ohci_hcd_jz_driver
 #endif
 
 #if defined(CONFIG_ARCH_SA1100) && defined(CONFIG_SA1111)

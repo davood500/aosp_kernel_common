@@ -35,7 +35,7 @@
 #define PRID_COMP_LEXRA		0x0b0000
 #define PRID_COMP_NETLOGIC	0x0c0000
 #define PRID_COMP_CAVIUM	0x0d0000
-#define PRID_COMP_INGENIC	0xd00000
+#define PRID_COMP_INGENIC	0xd10000
 
 /*
  * Assigned values for the product ID register.  In order to detect a
@@ -284,7 +284,7 @@ enum cpu_type_enum {
 #define MIPS_CPU_ISA_M64R2	0x00000100
 
 #define MIPS_CPU_ISA_32BIT (MIPS_CPU_ISA_I | MIPS_CPU_ISA_II | \
-	MIPS_CPU_ISA_M32R1 | MIPS_CPU_ISA_M32R2)
+	MIPS_CPU_ISA_M32R1 | MIPS_CPU_ISA_M32R2 )
 #define MIPS_CPU_ISA_64BIT (MIPS_CPU_ISA_III | MIPS_CPU_ISA_IV | \
 	MIPS_CPU_ISA_V | MIPS_CPU_ISA_M64R1 | MIPS_CPU_ISA_M64R2)
 
@@ -326,6 +326,7 @@ enum cpu_type_enum {
 #define MIPS_ASE_SMARTMIPS	0x00000008 /* SmartMIPS */
 #define MIPS_ASE_DSP		0x00000010 /* Signal Processing ASE */
 #define MIPS_ASE_MIPSMT		0x00000020 /* CPU supports MIPS MT */
+#define MIPS_ASE_XBURSTMXU	0x80000000 /* CPU supports MIPS MT */
 
 
 #endif /* _ASM_CPU_H */

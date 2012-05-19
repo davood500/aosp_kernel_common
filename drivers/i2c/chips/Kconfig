@@ -1,0 +1,99 @@
+#
+# Miscellaneous I2C chip drivers configuration
+#
+# *** DEPRECATED! Do not add new entries! See Makefile ***
+#
+
+menu "Miscellaneous I2C Chip support"
+
+config SENSORS_NEW
+	tristate "use the new sensors hardware.the driver should provide  manys interface for the andriod"
+	depends on EXPERIMENTAL
+	help
+		this is make the driver used for the andriod sensors.
+config SENSORS_JZ_MMA8452
+        tristate "JZ g_sensor MMA8452 driver"
+        depends on I2C
+        help
+
+config SENSORS_JZ_MMA8452_AS_INPUT
+	bool "JZ g_sensor MMA8452 as a input device"
+	depends on SENSORS_JZ_MMA8452
+	help
+
+config SENSORS_JZ_MMA8452_ORI
+	bool "JZ g_sensor MMA8452 orientation sensor "
+	depends on SENSORS_JZ_MMA8452
+	help
+
+config SENSORS_MMA7455L
+	tristate "Freescale MMA7455L 3-axis low-g accelerometer"
+	depends on I2C
+	help
+	  Say yes if wanna get support for Freescale 2g/4g/8g
+	  3-axis low-g accelerometer
+
+	  This driver cans also be built as a module. In that case,
+	  the module name would be mma7455l.
+
+config MMA7455L_AS_INPUT
+	bool "MMA7455L as a input device"
+	depends on SENSORS_MMA7455L
+	help
+
+config SENSORS_MMA8452_ORI
+	bool "MMA8452 orientation sensor "
+	depends on SENSORS_MMA8452
+	help
+
+config SENSORS_LIS33DE_35DE
+	tristate "LIS33DE and LIS35DE 3-axis low-g accelerometer"
+	depends on I2C
+	help
+	  Say yes if wanna get support for mems 2g/8g
+
+	  This driver cans also be built as a module. In that case,
+	  the module name would be lis35de.
+
+config LIS33DE_35DE_AS_INPUT
+	bool "LIS33DE and LIS35DE as a input device"
+	depends on SENSORS_LIS33DE_35DE
+
+config SENSORS_LIS33DE_35DE_ORI
+	bool "Lis33de and Lis35de fake orientation sensor"
+	depends on SENSORS_LIS33DE_35DE
+
+config SENSORS_LSM303DLH_ACC
+	tristate "LSM303DLH_ACC 3-axis accelerometer"
+	depends on I2C
+	help
+	  Say yes if wanna get support for mems 2g/4g/8g
+
+	  This driver cans also be built as a module. In that case,
+	  the module name would be lis303dlh.
+
+config LSM303DLH_ACC_AS_INPUT
+	bool "LSM303DLH as a input device"
+	depends on SENSORS_LSM303DLH_ACC
+	help
+
+config SENSORS_LSM303DLH_ORI
+	bool "Lsm303dlh fake orientation sensor"
+	depends on SENSORS_LSM303DLH_ACC
+	help 
+
+config SENSORS_LSM303DLH_MAG
+	tristate "LSM303DLH_MAG 3-aixs magnetometer"
+	depends on I2C
+	help
+	  Say yes if wanna get support for mems 2g/4g/8g
+
+	  This driver cans also be built as a module. In that case,
+	  the module name would be lis303dlh.
+
+config LSM303DLH_MAG_AS_INPUT
+	bool "LSM303DLH as a input device"
+	depends on SENSORS_LSM303DLH_MAG
+	help 
+
+endmenu

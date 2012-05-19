@@ -222,6 +222,30 @@ menuconfig NET_ETHERNET
 
 if NET_ETHERNET
 
+config JZ47XX_ETH
+	tristate "JZ47XX On-Chip Ethernet support"
+	depends on NET_ETHERNET && (SOC_JZ4770 || JZ_FPGA)
+	select MII
+	help
+	  Say Y for support of JZ47xx On-Chip Ethernet interface.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called jz47xx_eth.
+
+config JZ47XX_ETH_NAME
+	bool "Select the JZ47XX Ethernet Device Name"
+	depends on JZ47XX_ETH
+	help
+	  Select the default name of jz47xx ethernet device. If not select, 
+          then alloc the device name by the system.
+
+config DEFAULT_ETH_NAME
+        string "Default Ethernet Device Name"
+	depends on JZ47XX_ETH_NAME
+	default "eth0"
+	help
+	  The default name of jz47xx ethernet device.
+
 config MACB
 	tristate "Atmel MACB support"
 	depends on HAVE_NET_MACB
@@ -2465,13 +2489,6 @@ config MV643XX_ETH
 
 	  Some boards that use the Discovery chipset are the Momenco
 	  Ocelot C and Jaguar ATX and Pegasos II.
-
-config TITAN_GE
-	bool "PMC-Sierra TITAN Gigabit Ethernet Support"
-	depends on PMC_YOSEMITE
-	help
-	  This enables support for the the integrated ethernet of
-	  PMC-Sierra's Titan SoC.
 
 config XILINX_LL_TEMAC
 	tristate "Xilinx LL TEMAC (LocalLink Tri-mode Ethernet MAC) driver"

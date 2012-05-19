@@ -28,6 +28,7 @@ obj-$(CONFIG_SOUND_VWSND)	+= vwsnd.o
 obj-$(CONFIG_SOUND_BCM_CS4297A)	+= swarm_cs4297a.o
 
 obj-$(CONFIG_DMASOUND)		+= dmasound/
+obj-$(CONFIG_SOUND_JZ_I2S)      += xb47XX/
 
 # Declare multi-part drivers.
 

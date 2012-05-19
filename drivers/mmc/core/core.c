@@ -1672,7 +1672,9 @@ void mmc_rescan(struct work_struct *work)
 
 	mmc_claim_host(host);
 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
-		if (!mmc_rescan_try_freq(host, max(freqs[i], host->f_min))) {
+//		if (!mmc_rescan_try_freq(host, max(freqs[i], host->f_min))) {
+//I wanna to acknowledge whether the R1_CC_ERROR has some relation to init'clk, if not, revert it to the back.
+		if (!mmc_rescan_try_freq(host, host->f_min)) {
 			extend_wakelock = true;
 			break;
 		}
@@ -1922,6 +1924,10 @@ int mmc_pm_notify(struct notifier_block *notify_block,
 		notify_block, struct mmc_host, pm_notify);
 	unsigned long flags;
 
+	if ((host->card != NULL) && (host->card->type == MMC_TYPE_SDIO)) {
+		printk("SDIO: Direct return here!!!\n");
+		return 0;
+	}
 
 	switch (mode) {
 	case PM_HIBERNATION_PREPARE:

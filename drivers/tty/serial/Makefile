@@ -3,6 +3,7 @@
 #
 
 obj-$(CONFIG_SERIAL_CORE) += serial_core.o
+obj-$(CONFIG_SERIAL_INGENIC) += jz_uart.o
 obj-$(CONFIG_SERIAL_21285) += 21285.o
 
 # These Sparc drivers have to appear before others such as 8250

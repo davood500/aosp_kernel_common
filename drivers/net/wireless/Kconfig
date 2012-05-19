@@ -293,4 +293,13 @@ source "drivers/net/wireless/wl12xx/Kconfig"
 source "drivers/net/wireless/zd1211rw/Kconfig"
 source "drivers/net/wireless/mwifiex/Kconfig"
 
+config WIFI_BRCM
+       bool "Broadcom"
+       depends on JZSOC
+       select WIRELESS_EXT
+       select WEXT_PRIV
+       select FW_LOADER
+       help
+         This option contains static memory allocation for 4319 and 4329
+
 endif # WLAN

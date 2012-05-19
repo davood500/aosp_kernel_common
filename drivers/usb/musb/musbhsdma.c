@@ -37,6 +37,10 @@
 #include "musb_core.h"
 #include "musbhsdma.h"
 
+#ifdef CONFIG_SOC_JZ4770
+#include "jz47xx.h"
+#endif
+
 static int dma_controller_start(struct dma_controller *c)
 {
 	/* nothing to do */
@@ -380,6 +384,7 @@ void dma_controller_destroy(struct dma_controller *c)
 	kfree(controller);
 }
 
+#ifndef CONFIG_SOC_JZ4770
 struct dma_controller *__init
 dma_controller_create(struct musb *musb, void __iomem *base)
 {
@@ -420,3 +425,30 @@ dma_controller_create(struct musb *musb, void __iomem *base)
 
 	return &controller->controller;
 }
+#else
+struct dma_controller *__init
+dma_controller_create(struct musb *musb, void __iomem *base)
+{
+	struct musb_dma_controller *controller;
+	struct jz47xx_musb_glue *glue = musb_to_glue(musb);
+
+	controller = kzalloc(sizeof(*controller), GFP_KERNEL);
+	if (!controller)
+		return NULL;
+
+	controller->channel_count = MUSB_HSDMA_CHANNELS;
+	controller->private_data = musb;
+	controller->base = base;
+
+	controller->controller.start = dma_controller_start;
+	controller->controller.stop = dma_controller_stop;
+	controller->controller.channel_alloc = dma_channel_allocate;
+	controller->controller.channel_release = dma_channel_release;
+	controller->controller.channel_program = dma_channel_program;
+	controller->controller.channel_abort = dma_channel_abort;
+
+	glue->irq_dma_handler = dma_controller_irq;
+
+	return &controller->controller;
+}
+#endif

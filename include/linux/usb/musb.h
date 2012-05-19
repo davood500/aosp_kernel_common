@@ -130,6 +130,17 @@ struct musb_hdrc_platform_data {
 	const void	*platform_ops;
 };
 
+#ifdef	CONFIG_SOC_JZ4770
+
+struct jz47xx_musb_platform_data {
+	struct	musb_hdrc_platform_data *musb_pdata;
+	void	(*usb_power_callback)(void);
+	void	(*usb_connect_callback)(void);
+	void	(*usb_disconnect_callback)(void);
+	void	(*set_vbus)(int on);
+};
+
+#endif	/* ingenic SOC_JZ4770 */
 
 /* TUSB 6010 support */
 

@@ -4221,6 +4221,10 @@ pick_next_task(struct rq *rq)
 /*
  * __schedule() is the main scheduler function.
  */
+
+extern int try_release_gpu_driver_ioctl_lock(struct task_struct *tsk);
+extern int try_reaquire_gpu_driver_ioctl_lock(struct task_struct *tsk);
+
 static void __sched __schedule(void)
 {
 	struct task_struct *prev, *next;
@@ -4235,6 +4239,8 @@ need_resched:
 	rcu_note_context_switch(cpu);
 	prev = rq->curr;
 
+	try_release_gpu_driver_ioctl_lock(prev);
+need_resched_nonpreemptible:
 	schedule_debug(prev);
 
 	if (sched_feat(HRTICK))
@@ -4294,6 +4300,9 @@ need_resched:
 		raw_spin_unlock_irq(&rq->lock);
 
 	post_schedule(rq);
+
+	if (unlikely(try_reaquire_gpu_driver_ioctl_lock(current) < 0))
+		goto need_resched_nonpreemptible;
 
 	preempt_enable_no_resched();
 	if (need_resched())

@@ -14,7 +14,7 @@
 
 #include <asm/mipsmtregs.h>
 
-#include <irq.h>
+#include <mach/irq.h>
 
 static inline void irq_dispose_mapping(unsigned int virq)
 {

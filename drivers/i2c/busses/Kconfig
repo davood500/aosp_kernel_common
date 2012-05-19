@@ -7,6 +7,28 @@ menu "I2C Hardware Bus support"
 comment "PC SMBus host controller drivers"
 	depends on PCI
 
+config I2C0_JZ4770
+	tristate "JZ4770 I2C controler 0 Interface support"
+	depends on SOC_JZ4770
+	help
+	  If you have devices in the Ingenic JZ4770 I2C controler 0 bus, say yes to
+	  this option. This driver can also be built as a module.
+
+config I2C1_JZ4770
+	tristate "JZ4770 I2C  controler 1 Interface support"
+	depends on SOC_JZ4770
+	help
+	  If you have devices in the Ingenic JZ4770 I2C controler 1 bus, say yes to
+	  this option. This driver can also be built as a module.
+
+config I2C2_JZ4770
+	tristate "JZ4770 I2C  controler 2 Interface support"
+	depends on SOC_JZ4770
+	help
+	  If you have devices in the Ingenic JZ4770 I2C controler 2 bus, say yes to
+	  this option. This driver can also be built as a module.
+
+
 config I2C_ALI1535
 	tristate "ALI 1535"
 	depends on PCI

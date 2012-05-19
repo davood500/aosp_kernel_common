@@ -130,7 +130,7 @@ static inline struct musb *dev_to_musb(struct device *dev)
 
 /*-------------------------------------------------------------------------*/
 
-#ifndef CONFIG_BLACKFIN
+#if !defined(CONFIG_BLACKFIN) || !defined(CONFIG_SOC_JZ4770)
 static int musb_ulpi_read(struct otg_transceiver *otg, u32 offset)
 {
 	void __iomem *addr = otg->io_priv;
@@ -1519,6 +1519,7 @@ static int __init musb_core_init(u16 musb_type, struct musb *musb)
 static irqreturn_t generic_interrupt(int irq, void *__hci)
 {
 	unsigned long	flags;
+	struct musb_dma_controller *mdc;
 	irqreturn_t	retval = IRQ_NONE;
 	struct musb	*musb = __hci;
 
@@ -2370,41 +2371,41 @@ static int musb_resume_noirq(struct device *dev)
 	return 0;
 }
 
-static int musb_runtime_suspend(struct device *dev)
-{
-	struct musb	*musb = dev_to_musb(dev);
+/* static int musb_runtime_suspend(struct device *dev) */
+/* { */
+/* 	struct musb	*musb = dev_to_musb(dev); */
 
-	musb_save_context(musb);
+/* 	musb_save_context(musb); */
 
-	return 0;
-}
+/* 	return 0; */
+/* } */
 
-static int musb_runtime_resume(struct device *dev)
-{
-	struct musb	*musb = dev_to_musb(dev);
-	static int	first = 1;
+/* static int musb_runtime_resume(struct device *dev) */
+/* { */
+/* 	struct musb	*musb = dev_to_musb(dev); */
+/* 	static int	first = 1; */
 
-	/*
-	 * When pm_runtime_get_sync called for the first time in driver
-	 * init,  some of the structure is still not initialized which is
-	 * used in restore function. But clock needs to be
-	 * enabled before any register access, so
-	 * pm_runtime_get_sync has to be called.
-	 * Also context restore without save does not make
-	 * any sense
-	 */
-	if (!first)
-		musb_restore_context(musb);
-	first = 0;
+/* 	/\* */
+/* 	 * When pm_runtime_get_sync called for the first time in driver */
+/* 	 * init,  some of the structure is still not initialized which is */
+/* 	 * used in restore function. But clock needs to be */
+/* 	 * enabled before any register access, so */
+/* 	 * pm_runtime_get_sync has to be called. */
+/* 	 * Also context restore without save does not make */
+/* 	 * any sense */
+/* 	 *\/ */
+/* 	if (!first) */
+/* 		musb_restore_context(musb); */
+/* 	first = 0; */
 
-	return 0;
-}
+/* 	return 0; */
+/* } */
 
 static const struct dev_pm_ops musb_dev_pm_ops = {
 	.suspend	= musb_suspend,
 	.resume_noirq	= musb_resume_noirq,
-	.runtime_suspend = musb_runtime_suspend,
-	.runtime_resume = musb_runtime_resume,
+	/* .runtime_suspend = musb_runtime_suspend, */
+	/* .runtime_resume = musb_runtime_resume, */
 };
 
 #define MUSB_DEV_PM_OPS (&musb_dev_pm_ops)

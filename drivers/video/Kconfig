@@ -25,6 +25,8 @@ source "drivers/gpu/stub/Kconfig"
 
 source "drivers/gpu/ion/Kconfig"
 
+source "drivers/gpu/vivante/Kconfig"
+
 config VGASTATE
        tristate
        default n
@@ -261,6 +263,131 @@ config FB_TILEBLITTING
 comment "Frame buffer hardware drivers"
 	depends on FB
 
+/************************************************************/
+
+config JZSOC_BOOT_LOGO
+	tristate "JZSOC boot up LOGO support"
+	depends on FB && JZSOC
+	---help---
+	If you select this function, you need put a logo file at ramdisk root directory,
+	whose name should be "/logo.rle" or "/logo.rgb565".
+
+choice
+	prompt "Boot LOGO File Format Select"
+	depends on JZSOC_BOOT_LOGO
+
+config FB_565RLE_LOGO
+	bool "Boot logo is 565REL file"
+
+config FB_565RGB_LOGO
+	bool "Boot logo a 565RGB file"
+
+endchoice
+
+config FB_ANDROID_JZSOC
+	tristate "JZSOC ANDROID LCD controller support"
+	depends on FB && JZSOC
+	select FB_CFB_FILLRECT
+	select FB_CFB_COPYAREA
+	select FB_CFB_IMAGEBLIT
+	---help---
+	   JZSOC ANDROID LCD Controller driver support.
+
+choice 
+	depends on FB_ANDROID_JZSOC
+	prompt "JZSOC Android IPU Select"
+
+config FB_JZ47XX_ANDROID_IPU
+	bool "JZ47XX Android IPU support"
+	depends on FB_ANDROID_JZSOC && (SOC_JZ4770)
+	---help---
+	   JZ47XX Android IPU driver.
+
+endchoice
+
+choice
+	depends on FB_ANDROID_JZSOC
+	prompt "JZSOC Android LCD Controller Select"
+
+config FB_JZ47XX_ANDROID_LCD
+	bool "JZ47XX ANDROID LCD Controller support"
+	depends on FB && FB_ANDROID_JZSOC && (SOC_JZ4770)
+	select FB_CFB_FILLRECT
+	select FB_CFB_COPYAREA
+	select FB_CFB_IMAGEBLIT
+	---help---
+	   JZ47XX LCD Controller driver.
+	   JZ47XX LCD Controller support OSD function(refer jz4770_lcdc_spec.pdf).
+	   JZ47XX LCD OSD implement 2 framebuffer layers: foreground0 and foreground1.
+#	   JZ47XX LCD driver support only foreground0 default.
+
+endchoice
+
+choice
+	depends on FB_ANDROID_JZSOC && FB_JZ47XX_ANDROID_LCD
+	prompt "JZ47XX ANDROID LCD OSD Mode select"
+	default JZ47XX_ANDROID_LCD_USE_2LAYER_FG
+
+config JZ47XX_ANDROID_LCD_USE_FG0_ONLY
+	bool "Only use fg 0"
+
+config JZ47XX_ANDROID_LCD_USE_FG1_ONLY
+	bool "Only use fg 1"
+
+config JZ47XX_ANDROID_LCD_USE_2LAYER_FG
+       bool "Use 2-layer foregrounds."
+
+endchoice
+
+choice
+	prompt "JZ47XX Android LCD Type Select"	
+	depends on FB_ANDROID_JZSOC && FB_JZ47XX_ANDROID_LCD
+	default FB_JZ47XX_ANDROID_TFT
+
+config FB_JZ47XX_ANDROID_TFT
+	bool "JZ47XX ANDROID LCD Controller TFT LCD support"
+	---help---
+	You may select several panels here, but if you do this, 
+	make sure all the panels selected must support auto-probe, or
+	there is only one panel which does not support auto-probe at most.
+
+source "drivers/video/panel/Kconfig"
+
+config FB_JZ47XX_ANDROID_SLCD
+	bool "JZ47XX ANDROID LCD Controller Smart LCD support"
+
+endchoice
+
+config FB_JZ47XX_TVE
+	bool  "JZ47XX TV Encode support"
+	depends on FB_ANDROID_JZSOC && FB_JZ47XX_ANDROID_LCD && SOC_JZ4770
+	default y
+	---help---
+	   Use JZ47XX TV Encoder controller to display on TV.
+
+config JZ47XX_HDMI
+	bool "Jzsoc HDMI support"
+	depends on FB_ANDROID_JZSOC && FB_JZ47XX_ANDROID_LCD 
+	---help---
+	   Use JZ47XX HDMI to display on TV.
+
+source "drivers/video/hdmi/Kconfig"
+
+choice
+	depends on FB_ANDROID_JZSOC && FB_JZ47XX_ANDROID_LCD && FB_JZ47XX_ANDROID_SLCD
+	prompt "JZ47XX Smart LCD Panels Select"
+	default JZ47XX_ANDROID_SLCD_KGM701A3_TFT_SPFD5420A
+	---help---
+	   Select the lcd panel in you board
+config JZ47XX_ANDROID_LCD_TRULY_TFT_GG1P0319LTSW_W
+	boolean "TRULY_TFT_GG1P0319LTSW_W (240x320) (Smart LCD 16bit)"
+
+config JZ47XX_ANDROID_SLCD_KGM701A3_TFT_SPFD5420A
+	boolean "KGM701A3_TFT_SPFD5420A (400x240) (Smart LCD 18bit)"
+
+endchoice
+
+
 config FB_CIRRUS
 	tristate "Cirrus Logic support"
 	depends on FB && (ZORRO || PCI)
@@ -320,6 +447,70 @@ config FB_ARMCLCD
 	  inserted into and removed from the running kernel), say M
 	  here and read <file:Documentation/kbuild/modules.txt>.  The module
 	  will be called amba-clcd.
+
+choice
+
+	depends on FB_ARMCLCD && (ARCH_LH7A40X || ARCH_LH7952X)
+	prompt "LCD Panel"
+	default FB_ARMCLCD_SHARP_LQ035Q7DB02
+
+config FB_ARMCLCD_SHARP_LQ035Q7DB02_HRTFT
+	bool "LogicPD LCD 3.5\" QVGA w/HRTFT IC"
+	help
+	  This is an implementation of the Sharp LQ035Q7DB02, a 3.5"
+	  color QVGA, HRTFT panel.  The LogicPD device includes
+	  an integrated HRTFT controller IC.
+	  The native resolution is 240x320.
+
+config FB_ARMCLCD_SHARP_LQ057Q3DC02
+	bool "LogicPD LCD 5.7\" QVGA"
+	help
+	  This is an implementation of the Sharp LQ057Q3DC02, a 5.7"
+	  color QVGA, TFT panel.  The LogicPD device includes an
+	  The native resolution is 320x240.
+
+config FB_ARMCLCD_SHARP_LQ64D343
+	bool "LogicPD LCD 6.4\" VGA"
+	help
+	  This is an implementation of the Sharp LQ64D343, a 6.4"
+	  color VGA, TFT panel.  The LogicPD device includes an
+	  The native resolution is 640x480.
+
+config FB_ARMCLCD_SHARP_LQ10D368
+	bool "LogicPD LCD 10.4\" VGA"
+	help
+	  This is an implementation of the Sharp LQ10D368, a 10.4"
+	  color VGA, TFT panel.  The LogicPD device includes an
+	  The native resolution is 640x480.
+
+
+config FB_ARMCLCD_SHARP_LQ121S1DG41
+	bool "LogicPD LCD 12.1\" SVGA"
+	help
+	  This is an implementation of the Sharp LQ121S1DG41, a 12.1"
+	  color SVGA, TFT panel.  The LogicPD device includes an
+	  The native resolution is 800x600.
+
+	  This panel requires a clock rate may be an integer fraction
+	  of the base LCDCLK frequency.  The driver will select the
+	  highest frequency available that is lower than the maximum
+	  allowed.  The panel may flicker if the clock rate is
+	  slower than the recommended minimum.
+
+config FB_ARMCLCD_AUO_A070VW01_WIDE
+	bool "AU Optronics A070VW01 LCD 7.0\" WIDE"
+	help
+	  This is an implementation of the AU Optronics, a 7.0"
+	  WIDE Color.  The native resolution is 234x480.
+
+config FB_ARMCLCD_HITACHI
+	bool "Hitachi Wide Screen 800x480"
+	help
+	  This is an implementation of the Hitachi 800x480.
+
+endchoice
+
+
 
 config FB_ACORN
 	bool "Acorn VIDC support"
@@ -2186,7 +2377,7 @@ config FB_XILINX
 
 config FB_COBALT
 	tristate "Cobalt server LCD frame buffer support"
-	depends on FB && (MIPS_COBALT || MIPS_SEAD3)
+	depends on FB && MIPS_COBALT
 
 config FB_SH7760
 	bool "SH7760/SH7763/SH7720/SH7721 LCDC support"
@@ -2389,6 +2580,13 @@ source "drivers/video/omap/Kconfig"
 source "drivers/video/omap2/Kconfig"
 
 source "drivers/video/backlight/Kconfig"
+
+menuconfig JZ47XX_AOSDC
+	bool "JZ47xx AOSDC support"
+	default n
+	help
+	  Enable jz47xx AOSDC function support
+
 source "drivers/video/display/Kconfig"
 
 if VT

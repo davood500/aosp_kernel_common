@@ -76,6 +76,8 @@
  */
 #define  MACH_INGENIC_JZ4730	0	/* JZ4730 SOC		*/
 #define  MACH_INGENIC_JZ4740	1	/* JZ4740 SOC		*/
+#define  MACH_INGENIC_JZ4770	2	/* JZ4760 SOC		*/
+
 
 extern char *system_type;
 const char *get_system_type(void);

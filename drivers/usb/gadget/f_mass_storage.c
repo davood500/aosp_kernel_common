@@ -290,7 +290,7 @@
 #include <linux/string.h>
 #include <linux/freezer.h>
 #include <linux/utsname.h>
-
+#include <linux/wakelock.h>
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 #include <linux/usb/composite.h>
@@ -791,12 +791,13 @@ static int do_read(struct fsg_common *common)
 		 */
 		amount = min(amount_left, FSG_BUFLEN);
 		amount = min((loff_t)amount,
-			     curlun->file_length - file_offset);
-		partial_page = file_offset & (PAGE_CACHE_SIZE - 1);
-		if (partial_page > 0)
-			amount = min(amount, (unsigned int)PAGE_CACHE_SIZE -
-					     partial_page);
-
+				curlun->file_length - file_offset);
+		if (curlun->is_chare_sd == 1){
+			partial_page = file_offset & (PAGE_CACHE_SIZE - 1);
+			if (partial_page > 0)
+				amount = min(amount, (unsigned int)PAGE_CACHE_SIZE -
+						partial_page);
+		}
 		/* Wait for the next buffer to become available */
 		bh = common->next_buffhd_to_fill;
 		while (bh->state != BUF_STATE_EMPTY) {
@@ -811,7 +812,7 @@ static int do_read(struct fsg_common *common)
 		 */
 		if (amount == 0) {
 			curlun->sense_data =
-					SS_LOGICAL_BLOCK_ADDRESS_OUT_OF_RANGE;
+				SS_LOGICAL_BLOCK_ADDRESS_OUT_OF_RANGE;
 			curlun->sense_data_info = file_offset >> 9;
 			curlun->info_valid = 1;
 			bh->inreq->length = 0;
@@ -821,11 +822,17 @@ static int do_read(struct fsg_common *common)
 
 		/* Perform the read */
 		file_offset_tmp = file_offset;
-		nread = vfs_read(curlun->filp,
-				 (char __user *)bh->buf,
-				 amount, &file_offset_tmp);
+		if (curlun->is_chare_sd == 1){
+			nread = vfs_read(curlun->filp,
+					(char __user *)bh->buf,
+					amount, &file_offset_tmp);
+		}else{
+			nread = vfs_read(curlun->filp2,
+					(char __user *)bh->buf,
+					amount, &file_offset_tmp);
+		}
 		VLDBG(curlun, "file read %u @ %llu -> %d\n", amount,
-		      (unsigned long long)file_offset, (int)nread);
+				(unsigned long long)file_offset, (int)nread);
 		if (signal_pending(current))
 			return -EINTR;
 
@@ -834,7 +841,7 @@ static int do_read(struct fsg_common *common)
 			nread = 0;
 		} else if (nread < amount) {
 			LDBG(curlun, "partial file read: %d/%u\n",
-			     (int)nread, amount);
+					(int)nread, amount);
 			nread -= (nread & 511);	/* Round down to a block */
 		}
 		file_offset  += nread;
@@ -877,7 +884,7 @@ static int do_write(struct fsg_common *common)
 	u32			amount_left_to_req, amount_left_to_write;
 	loff_t			usb_offset, file_offset, file_offset_tmp;
 	unsigned int		amount;
-	unsigned int		partial_page;
+	unsigned int        partial_page;
 	ssize_t			nwritten;
 	int			rc;
 
@@ -944,12 +951,13 @@ static int do_write(struct fsg_common *common)
 			 */
 			amount = min(amount_left_to_req, FSG_BUFLEN);
 			amount = min((loff_t)amount,
-				     curlun->file_length - usb_offset);
-			partial_page = usb_offset & (PAGE_CACHE_SIZE - 1);
-			if (partial_page > 0)
-				amount = min(amount,
-	(unsigned int)PAGE_CACHE_SIZE - partial_page);
-
+					curlun->file_length - usb_offset);
+			if (curlun->is_chare_sd == 1){
+				partial_page = usb_offset & (PAGE_CACHE_SIZE - 1);
+				if (partial_page > 0)
+					amount = min(amount,
+							(unsigned int)PAGE_CACHE_SIZE - partial_page);
+			}
 			if (amount == 0) {
 				get_some_more = 0;
 				curlun->sense_data =
@@ -1010,29 +1018,36 @@ static int do_write(struct fsg_common *common)
 			amount = bh->outreq->actual;
 			if (curlun->file_length - file_offset < amount) {
 				LERROR(curlun,
-				       "write %u @ %llu beyond end %llu\n",
-				       amount, (unsigned long long)file_offset,
-				       (unsigned long long)curlun->file_length);
+						"write %u @ %llu beyond end %llu\n",
+						amount, (unsigned long long)file_offset,
+						(unsigned long long)curlun->file_length);
 				amount = curlun->file_length - file_offset;
 			}
 
 			/* Perform the write */
 			file_offset_tmp = file_offset;
-			nwritten = vfs_write(curlun->filp,
-					     (char __user *)bh->buf,
-					     amount, &file_offset_tmp);
+			if (curlun->is_chare_sd == 1){
+				nwritten = vfs_write(curlun->filp,
+						(char __user *)bh->buf,
+						amount, &file_offset_tmp);
+			}else{
+				nwritten = vfs_write(curlun->filp2,
+						(char __user *)bh->buf,
+						amount, &file_offset_tmp);
+
+			}
 			VLDBG(curlun, "file write %u @ %llu -> %d\n", amount,
-			      (unsigned long long)file_offset, (int)nwritten);
+					(unsigned long long)file_offset, (int)nwritten);
 			if (signal_pending(current))
 				return -EINTR;		/* Interrupted! */
 
 			if (nwritten < 0) {
 				LDBG(curlun, "error in file write: %d\n",
-				     (int)nwritten);
+						(int)nwritten);
 				nwritten = 0;
 			} else if (nwritten < amount) {
 				LDBG(curlun, "partial file write: %d/%u\n",
-				     (int)nwritten, amount);
+						(int)nwritten, amount);
 				nwritten -= (nwritten & 511);
 				/* Round down to a block */
 			}
@@ -2773,7 +2788,7 @@ static struct fsg_common *fsg_common_init(struct fsg_common *common,
 	common->luns = curlun;
 
 	init_rwsem(&common->filesem);
-
+	
 	for (i = 0, lcfg = cfg->luns; i < nluns; ++i, ++curlun, ++lcfg) {
 		curlun->cdrom = !!lcfg->cdrom;
 		curlun->ro = lcfg->cdrom || lcfg->ro;
@@ -2816,6 +2831,8 @@ static struct fsg_common *fsg_common_init(struct fsg_common *common,
 			rc = -EINVAL;
 			goto error_luns;
 		}
+		sprintf(curlun->name,"mass_storage_lun%d",i);
+		wake_lock_init(&curlun->wake_lock,WAKE_LOCK_SUSPEND,curlun->name);
 	}
 	common->nluns = nluns;
 
@@ -2940,6 +2957,7 @@ static void fsg_common_release(struct kref *ref)
 			device_remove_file(&lun->dev, &dev_attr_file);
 			fsg_lun_close(lun);
 			device_unregister(&lun->dev);
+			wake_lock_destroy(&lun->wake_lock);
 		}
 
 		kfree(common->luns);

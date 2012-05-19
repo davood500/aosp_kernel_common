@@ -1,0 +1,12 @@
+
+
+
+
+Debug:
+hal/kernel/inc/gc_hal_options.h
+#define USE_JZ_FLUSH_CACHE          1
+
+#define FIXED_MMAP_AS_CACHEABLE     1 // orig mmap as uncache, fix mmap as cacheable
+
+#define gcdNULL_DRIVER_TEST         0 // 2
+extern int gcdnull_driver_test; // hal/os/linux/kernel/gc_hal_kernel_driver.c

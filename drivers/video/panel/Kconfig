@@ -1,0 +1,141 @@
+#
+# LCD Panel Configuration
+#
+comment "JZ47XX Android LCD TFT Panel Select"
+	depends on FB_JZ47XX_ANDROID_TFT
+
+config ANDROID_LCD_HDMI_DEFAULT
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "Default HDMI output (24bits)"
+
+config HDMI_DEFAULT_WIDTH
+	int "Default HDMI output width"
+	depends on ANDROID_LCD_HDMI_DEFAULT
+	default "1280"
+	help
+	  The default value of HDMI output width.
+
+config HDMI_DEFAULT_HEIGHT
+	int "Default HDMI output height"
+	depends on ANDROID_LCD_HDMI_DEFAULT
+	default "720"
+	help
+	  The default value of HDMI output height.
+
+config HDMI_DEFAULT_FPS
+	int "Default HDMI output FPS"
+	depends on ANDROID_LCD_HDMI_DEFAULT
+	default "60"
+	help
+	  The default value of HDMI output FPS.
+
+config ANDROID_LCD_AUO_A043FL01V2
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "AUO A043FL01V2 TFT panel (480x272)(24bits)"
+
+config ANDROID_LCD_FOXCONN_PT035TN01
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "FOXCONN PT035TN01 parellel TFT panel (320x240, 3.5in)(24bits)"
+
+config ANDROID_LCD_INNOLUX_PT035TN01_SERIAL
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "INNOLUX PT035TN01 8bit-serial TFT panel (320x240, 3.5in)(24bits)"
+
+config ANDROID_LCD_TOPPOLY_TD043MGEB1
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "TOPPOLY_TD043MGEB1 TFT panel(800x480)(24bit mode)"
+
+config ANDROID_LCD_SAMSUNG_AMS369FG06
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "SAMSUNG_AMS369FG06 TFT panel(480x800)(24bit mode)"
+
+config ANDROID_LCD_SAMSUNG_LMS350DF04
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "SAMSUNG_LMS350DF04 TFT panel(320x480)(24bit mode)"
+
+config ANDROID_LCD_TRULY_TFT_ER61581
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "Turly ER61581 TFT panel(320X480) 16 bit"
+
+config ANDROID_LCD_TRULY_TFT_RM68040
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "Turly RM68040 TFT panel(320X480) 16 bit"
+
+config ANDROID_LCD_HIMAX_TFT_HX8357
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "Himax HX8357 TFT panel(320X480) 16 bit"
+
+config ANDROID_LCD_YUE_TFT_YL10922NT
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "shian yue yl10922 TFT panel(320X480) 16 bit"
+
+config ANDROID_LCD_KD50G9_40NM_B1
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "KD50G9_40NM_B1 TFT panel(800x480)(24bit mode)"
+
+config ANDROID_LCD_KD50G2_40NM_A2
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "KD50G2_40NM_A2 TFT panel(800x480)(24bit mode)"
+
+config ANDROID_LCD_LS032T8HX01
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "LS032T8HX01 TFT panel(800x480)(24bit mode)"
+	
+config ANDROID_LCD_AT070TN93
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "AT070TN93 TFT panel(800x480)(24bit mode)"
+	
+config ANDROID_LCD_AT070TNA2
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "AT070TNA2 TFT LVDS panel(1024x600)(24bit mode)"
+
+config ANDROID_LCD_HANNSTAR_HSD070IDW1_A
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "HANNSTAR HSD070IDW1-A TFT panel(800x480)(24bit mode)"
+
+config ANDROID_LCD_HYNIX_HT12X14
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "HYNIX_HT12X14 TFT panel(1024x768)(24bit mode)"
+
+config ANDROID_LCD_INNOLUX_AT070TN90
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "INNOLUX_AT070TN90 TFT panel(800x480)(24bit mode)"
+
+config ANDROID_LCD_CPT_CLAA070MA21BW
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "CPT (Chunghwa Picture Tubes) CLAA070MA21BW  TFT panel(800x600)(24bit mode)"
+
+config ANDROID_LCD_BYD_BM1024600
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "BYD BYD BM1024600  TFT panel(1024x600)(24bit mode)"
+
+config ANDROID_LCD_TL080WX800
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "TUWUXIAN TL080WX800 LVDS panel(1280x768)(24bit mode)"
+
+config ANDROID_LCD_AUO_A043FL01V2
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "AUO A043FL01V2 TFT panel(480x272)(24bit mode)"
+
+config ANDROID_LCD_LTN097XL01_A01
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "SAMSUNG LTN097XL01_A01 LVDS TFT panel(1024x768)()"
+
+config ANDROID_LCD_KD080D3_40NB_A3
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "King Display KD080D3_40NB_A3 LVDS TFT panel(1024x768)()"
+
+config ANDROID_LCD_HV070WSA_100
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "HV070WSA_100 LVDS TFT panel(1024x600)()"
+
+config ANDROID_LCD_M156B3_LA1
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "M156B3_LA1 LVDS TFT panel(1366x768)()"
+
+config ANDROID_LCD_HLY070ML290
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "HLY070ML290 TFT panel(800x480)()"
+config ANDROID_LCD_TM080SFH01
+	depends on FB_JZ47XX_ANDROID_TFT
+	bool "TM080SFH01 TFT panel(800x600)()"

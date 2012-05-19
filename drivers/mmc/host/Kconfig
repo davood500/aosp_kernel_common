@@ -4,6 +4,157 @@
 
 comment "MMC/SD/SDIO Host Controller Drivers"
 
+config MSC0_JZ4770
+	tristate "JZ4770 SD/Multimedia Card 0 Interface support"
+	depends on SOC_JZ4770
+	help
+	  This selects the Ingenic JZ4770 SD/Multimedia card 0 Interface.
+	  If you have a Ingenic platform with a Multimedia Card slot,
+	  say Y or M here.
+
+	  If unsure, say N.
+
+choice
+	depends on MSC0_JZ4770
+	prompt "MSC0 BUS Width"
+	default JZ4770_MSC0_BUS_4
+	help
+	This defines the BUS Width of the Ingenic JZ4770 SD/Multimedia card Interface.
+
+config JZ4770_MSC0_BUS_1
+	bool "1 Bit Bus"
+	help
+	 1 Bit SD/Multimedia Card Bus
+
+config JZ4770_MSC0_BUS_4
+	bool "4 Bit Bus"
+	help
+	 4 Bit SD/Multimedia Card Bus
+
+config JZ4770_MSC0_BUS_8
+	bool "8 Bit Bus"
+	help
+	 8 Bit Multimedia Card Bus
+
+endchoice
+
+config MSC0_SDIO_SUPPORT
+	tristate "JZ4770 SDIO for MSC0 support"
+	depends on MSC0_JZ4770
+	help
+	  SDIO support for MSC0.
+
+	  If unsure,say N.
+
+config MSC1_JZ4770
+	tristate "JZ4770 SD/Multimedia Card 1 Interface support"
+	depends on SOC_JZ4770
+	help
+	  This selects the Ingenic JZ4770 SD/Multimedia card 1 Interface.
+	  If you have a Ingenic platform with a Multimedia Card slot,
+	  say Y or M here.
+
+	  If unsure, say N.
+
+choice
+	depends on MSC1_JZ4770
+	prompt "MSC1 BUS Width"
+	default JZ4770_MSC1_BUS_4
+	help
+	This defines the BUS Width of the Ingenic JZ4750 SD/Multimedia card Interface.
+
+config JZ4770_MSC1_BUS_1
+	bool "1 Bit Bus"
+	help
+	 1 Bit SD/Multimedia Card Bus
+
+config JZ4770_MSC1_BUS_4
+	bool "4 Bit Bus"
+	help
+	 4 Bit SD/Multimedia Card Bus
+	 
+config JZ4770_MSC1_BUS_8
+	bool "8 Bit Bus"
+	help
+	 8 Bit Multimedia Card Bus
+endchoice
+
+config MSC1_SDIO_SUPPORT
+	tristate "JZ4770 SDIO for MSC1 support"
+	depends on MSC1_JZ4770
+	help
+	  SDIO support for MSC1.
+
+	  If unsure,say N.
+
+config MSC2_JZ4770
+	tristate "JZ4770 SD/Multimedia Card 2 Interface support"
+	depends on SOC_JZ4770
+	help
+	  This selects the Ingenic JZ4770 SD/Multimedia card 2 Interface.
+	  If you have a Ingenic platform with a Multimedia Card slot,
+	  say Y or M here.
+
+	  If unsure, say N.
+
+choice
+	depends on MSC2_JZ4770
+	prompt "MSC1 BUS Width"
+	default JZ4770_MSC2_BUS_4
+	help
+	This defines the BUS Width of the Ingenic JZ4750 SD/Multimedia card Interface.
+
+config JZ4770_MSC2_BUS_1
+	bool "1 Bit Bus"
+	help
+	 1 Bit SD/Multimedia Card Bus
+
+config JZ4770_MSC2_BUS_4
+	bool "4 Bit Bus"
+	help
+	 4 Bit SD/Multimedia Card Bus
+	 
+config JZ4770_MSC2_BUS_8
+	bool "8 Bit Bus"
+	help
+	 8 Bit Multimedia Card Bus
+endchoice
+
+config MSC2_SDIO_SUPPORT
+	tristate "JZ4770 SDIO for MSC2 support"
+	depends on MSC2_JZ4770
+	help
+	  SDIO support for MSC2.
+
+	  If unsure,say N.
+
+config JZ4770_BOOT_FROM_MSC0
+	bool "JZ4770 Boot from SD/Multimedia Card Interface support"
+	depends on SOC_JZ4770
+	help
+	  This selects boot from the Sd/Multimedia Card.
+
+	  If unsure,say N.
+
+config RESP_PROG_IRQ_MODE
+	bool "Response-Programing IRQ mode"
+	depends on SOC_JZ4760B || SOC_JZ4760 || SOC_JZ4770
+	default y
+	help
+	  Use IRQ-mode instead of polling-mode to wait for command response and write-programing.
+
+	  If unsure,say N.
+
+
+
+
+
+
+
+
+
+
+
 config MMC_ARMMMCI
 	tristate "ARM AMBA Multimedia Card Interface support"
 	depends on ARM_AMBA

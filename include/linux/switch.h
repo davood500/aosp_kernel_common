@@ -38,6 +38,8 @@ struct gpio_switch_platform_data {
 	/* if NULL, "0" or "1" will be printed */
 	const char *state_on;
 	const char *state_off;
+
+	int valid_level;
 };
 
 extern int switch_dev_register(struct switch_dev *sdev);

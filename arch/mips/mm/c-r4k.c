@@ -7,6 +7,10 @@
  * Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002 Ralf Baechle (ralf@gnu.org)
  * Copyright (C) 1999, 2000 Silicon Graphics, Inc.
  */
+#if defined(CONFIG_SOC_JZ4770)
+#include "c-jz.c"
+#else
+
 #include <linux/hardirq.h>
 #include <linux/init.h>
 #include <linux/highmem.h>
@@ -1475,3 +1479,5 @@ void __cpuinit r4k_cache_init(void)
 
 	coherency_setup();
 }
+
+#endif /* CONFIG_SOC_JZ4770 */

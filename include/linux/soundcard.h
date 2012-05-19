@@ -654,6 +654,16 @@ typedef struct buffmem_desc {
 #	define SPDIF_DRS	0x4000
 #	define SPDIF_V		0x8000
 
+
+typedef struct direct_info {
+		int bytes;	/* Total # of bytes processed */
+		int offset;	/* Current DMA pointer value */
+	} direct_info;
+
+#define SNDCTL_EXT_DIRECT_GETNODE	_SIOR ('P',77, direct_info)
+#define SNDCTL_EXT_DIRECT_SETNODE	_SIOR ('P',78, direct_info)
+
+
 /*
  * Application's profile defines the way how playback underrun situations should be handled.
  * 
@@ -696,6 +706,7 @@ typedef struct buffmem_desc {
 #define SOUND_PCM_GETOPTR		SNDCTL_DSP_GETOPTR
 #define SOUND_PCM_MAPINBUF		SNDCTL_DSP_MAPINBUF
 #define SOUND_PCM_MAPOUTBUF		SNDCTL_DSP_MAPOUTBUF
+
 
 /*
  * ioctl calls to be used in communication with coprocessors and
@@ -1231,7 +1242,7 @@ void seqbuf_dump(void);	/* This function must be provided by programs */
 #define SEQ_PANNING(dev, voice, pos) SEQ_CONTROL(dev, voice, CTL_PAN, (pos+128) / 2)
 
 /*
- * Timing and synchronization macros
+ * Timing and syncronization macros
  */
 
 #define _TIMER_EVENT(ev, parm)		{_SEQ_NEEDBUF(8);\

@@ -1,6 +1,13 @@
 #
 # Makefile for MMC/SD host controller drivers
 #
+obj-$(CONFIG_MSC0_JZ4750)	+= jz_mmc/
+obj-$(CONFIG_MSC1_JZ4750)	+= jz_mmc/
+obj-$(CONFIG_MSC0_JZ4760)	+= jz_mmc/
+obj-$(CONFIG_MSC1_JZ4760)	+= jz_mmc/
+obj-$(CONFIG_MSC0_JZ4770)	+= jz_mmc/
+obj-$(CONFIG_MSC1_JZ4770)	+= jz_mmc/
+obj-$(CONFIG_MSC2_JZ4770)	+= jz_mmc/
 
 obj-$(CONFIG_MMC_ARMMMCI)	+= mmci.o
 obj-$(CONFIG_MMC_PXA)		+= pxamci.o

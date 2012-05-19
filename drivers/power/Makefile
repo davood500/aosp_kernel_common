@@ -36,3 +36,7 @@ obj-$(CONFIG_CHARGER_ISP1704)	+= isp1704_charger.o
 obj-$(CONFIG_CHARGER_MAX8903)	+= max8903_charger.o
 obj-$(CONFIG_CHARGER_TWL4030)	+= twl4030_charger.o
 obj-$(CONFIG_CHARGER_GPIO)	+= gpio-charger.o
+
+obj-$(CONFIG_BATTERY_JZ47XX)    	+= jz47xx_battery/
+obj-$(CONFIG_JZ_VOLTAGEM)    		+= voltage_battery.o
+obj-$(CONFIG_PMU_ACT8600_SUPPORT)	+= act8600_power.o

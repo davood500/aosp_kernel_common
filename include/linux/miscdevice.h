@@ -40,6 +40,9 @@
 #define BTRFS_MINOR		234
 #define AUTOFS_MINOR		235
 #define MAPPER_CTRL_MINOR	236
+#define TCSM_MINOR      	242        /* JZ TCSM for multimedia */
+#define CIM_MINOR       	243        /* JZ CIM for multimedia */
+#define MODEM_MINOR     	244
 #define MISC_DYNAMIC_MINOR	255
 
 struct device;

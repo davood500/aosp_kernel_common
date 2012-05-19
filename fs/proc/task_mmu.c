@@ -238,7 +238,7 @@ static void show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 			end,
 			flags & VM_READ ? 'r' : '-',
 			flags & VM_WRITE ? 'w' : '-',
-			flags & VM_EXEC ? 'x' : '-',
+			flags & VM_EXEC ? '-' : '-',
 			flags & VM_MAYSHARE ? 's' : 'p',
 			pgoff,
 			MAJOR(dev), MINOR(dev), ino, &len);

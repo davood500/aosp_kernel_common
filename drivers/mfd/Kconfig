@@ -20,6 +20,17 @@ menuconfig MFD_SUPPORT
 
 if MFD_SUPPORT
 
+config SADC_JZ47XX
+        tristate "JZ47XX SADC CORE driver"
+	depends on JZSOC
+        default n
+        help
+          Say Y here to enable JZ4760 SAR A/D controller if you use sadx
+          on JZSOC platform.
+
+          To compile this driver as a module, choose M here, and the
+          module jz_ts should be called.
+
 config MFD_CORE
 	tristate
 	default n

@@ -212,6 +212,20 @@ config MACH_JZ4740
 	select HAVE_PWM
 	select HAVE_CLK
 
+config SOC_JZ4770
+	bool "Ingenic JZ4770 based machines"
+	select JZSOC
+	select JZRISC
+	select CPU_SUPPORTS_HIGHMEM
+	select SYS_SUPPORTS_HIGHMEM
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select DMA_NONCOHERENT
+	select GENERIC_GPIO
+	select ARCH_REQUIRE_GPIOLIB
+	select SYS_HAS_EARLY_PRINTK
+
 config LANTIQ
 	bool "Lantiq based platforms"
 	select DMA_NONCOHERENT
@@ -820,6 +834,7 @@ source "arch/mips/ath79/Kconfig"
 source "arch/mips/bcm63xx/Kconfig"
 source "arch/mips/jazz/Kconfig"
 source "arch/mips/jz4740/Kconfig"
+source "arch/mips/jz4770/Kconfig"
 source "arch/mips/lantiq/Kconfig"
 source "arch/mips/lasat/Kconfig"
 source "arch/mips/pmc-sierra/Kconfig"
@@ -833,6 +848,11 @@ source "arch/mips/loongson/Kconfig"
 source "arch/mips/netlogic/Kconfig"
 
 endmenu
+
+config JZSOC
+	bool
+config JZRISC
+	bool
 
 config RWSEM_GENERIC_SPINLOCK
 	bool

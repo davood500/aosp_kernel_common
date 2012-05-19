@@ -58,6 +58,10 @@
 #include <asm/unaligned.h>
 
 
+#include <asm/jzmmc/jz_mmc_charsd.h>
+extern struct charsd_dev *jz_charsd_devp;
+
+
 /*
  * Thanks to NetChip Technologies for donating this product ID.
  *
@@ -225,12 +229,14 @@ struct interrupt_data {
 #define ASC(x)		((u8) ((x) >> 8))
 #define ASCQ(x)		((u8) (x))
 
+/*add by bcjia to install cd_rom, this define can not be changed*/
+#define CD_ROM_NAME "cd_rom.iso"
 
 /*-------------------------------------------------------------------------*/
-
-
 struct fsg_lun {
 	struct file	*filp;
+	struct file *filp2;
+
 	loff_t		file_length;
 	loff_t		num_sectors;
 
@@ -243,11 +249,16 @@ struct fsg_lun {
 	unsigned int	info_valid:1;
 	unsigned int	nofua:1;
 
+	unsigned char is_chare_sd;
+
 	u32		sense_data;
 	u32		sense_data_info;
 	u32		unit_attention_data;
 
 	struct device	dev;
+
+	struct wake_lock wake_lock;
+	char name[32];
 };
 
 #define fsg_lun_is_open(curlun)	((curlun)->filp != NULL)
@@ -266,7 +277,7 @@ static struct fsg_lun *fsg_lun_from_dev(struct device *dev)
 #define FSG_NUM_BUFFERS	2
 
 /* Default size of buffer length. */
-#define FSG_BUFLEN	((u32)16384)
+#define FSG_BUFLEN	((u32)65536)
 
 /* Maximal number of LUNs supported in mass storage function */
 #define FSG_MAX_LUNS	8
@@ -539,18 +550,88 @@ static int fsg_lun_open(struct fsg_lun *curlun, const char *filename)
 	loff_t				num_sectors;
 	loff_t				min_sectors;
 
+	struct file         *filp2 = NULL;
+	struct charsd_dev *devp;
+	char uminor[3];
+	char uminor_path[3];
+	char *uminor_open = (char *)(filename + 20);
+	char charsd_path_open[25] = "/dev/jz_charsd_";
+	unsigned char i = 0,j = 0;
+
+	unsigned int flag_cmp = 1; 
+	char *name;
+	/*init curlun->is_chare_sd by control define*/
+#ifdef CONFIG_USB_ANDROID_CHARSD
+	curlun->is_chare_sd = 0;
+#else
+	curlun->is_chare_sd = 1;
+#endif
+
+	/*added by bcjia to install cd_rom*/
+	name = strrchr(filename,'/');
+	if (name == NULL){   //example filename is "cd_rom.iso"
+		flag_cmp = strcasecmp(filename,CD_ROM_NAME);
+	}else{          //example filename is "/cd_rom.iso"
+		flag_cmp = strcasecmp(name+1,CD_ROM_NAME);
+	}
+
+	if (flag_cmp == 0){
+		curlun->is_chare_sd = 1;
+		curlun->cdrom = 1;
+	}
+
 	/* R/W if we can, R/O if we must */
 	ro = curlun->initially_ro;
 	if (!ro) {
 		filp = filp_open(filename, O_RDWR | O_LARGEFILE, 0);
 		if (PTR_ERR(filp) == -EROFS || PTR_ERR(filp) == -EACCES)
 			ro = 1;
+
+		if (curlun->is_chare_sd == 0){
+
+			for(i = 0;i < NUMBER_OF_CHARSD;i++) {
+				devp = &jz_charsd_devp[i];
+				printk("Charsd_debug: get charsd_%d\n", i);
+				j = 0;
+				while (devp->uminor[j].used) {
+					sprintf(uminor,"%d",devp->uminor[j].minor);
+					printk("Charsd_debug: devp->uminor[%d] is used.\n", j);
+					if(!strcmp(uminor,uminor_open)) {
+						sprintf(uminor_path,"%d",i);
+						strcat(charsd_path_open,uminor_path);
+						devp->pa_start_addr = devp->uminor[j].partition_start_addr;
+						printk("Charsd_debug: devp->uminor[%d] is match. start_addr = 0x%08X\n",
+								j, (unsigned int)devp->pa_start_addr); //This addr maybe 64-bit!
+						goto devp_done;
+					}
+					j++;
+				}
+			}
+devp_done:
+
+			//	printk_charsd("Charsd_debug: devp->pa_start_addr = 0x%08X ,devp->uminor[%d].minor = %d\n",
+			//      (unsigned int)devp->pa_start_addr, j, devp->uminor[j].minor);
+			// printk_charsd("Charsd_debug: vold_filename = %s\n", filename);
+			// printk_charsd("Charsd_debug: charsd_path_open = %s\n", charsd_path_open);
+
+			if(!strcmp("/dev/jz_charsd_",charsd_path_open)) {
+				printk("Charsd: Didn't get right fp!");
+			}
+			filp2 = filp_open(charsd_path_open, O_RDWR | O_LARGEFILE, 0);
+		}
 	}
 	if (ro)
 		filp = filp_open(filename, O_RDONLY | O_LARGEFILE, 0);
 	if (IS_ERR(filp)) {
 		LINFO(curlun, "unable to open backing file: %s\n", filename);
 		return PTR_ERR(filp);
+	}
+
+	if (curlun->is_chare_sd == 0){
+		if (IS_ERR(filp2)) {
+			LINFO(curlun, "unable to open backing charsd file: %s\n", charsd_path_open);
+			return PTR_ERR(filp2);
+		}
 	}
 
 	if (!(filp->f_mode & FMODE_WRITE))
@@ -584,7 +665,7 @@ static int fsg_lun_open(struct fsg_lun *curlun, const char *filename)
 	min_sectors = 1;
 	if (curlun->cdrom) {
 		num_sectors &= ~3;	/* Reduce to a multiple of 2048 */
-		min_sectors = 300*4;	/* Smallest track is 300 frames */
+		min_sectors = 100*4;	/* Smallest track is 300 frames */
 		if (num_sectors >= 256*60*75*4) {
 			num_sectors = (256*60*75 - 1) * 4;
 			LINFO(curlun, "file too big: %s\n", filename);
@@ -601,11 +682,18 @@ static int fsg_lun_open(struct fsg_lun *curlun, const char *filename)
 	get_file(filp);
 	curlun->ro = ro;
 	curlun->filp = filp;
+
+	if (curlun->is_chare_sd == 0){
+		curlun->filp2 = filp2;
+	}
+
 	curlun->file_length = size;
 	curlun->num_sectors = num_sectors;
 	LDBG(curlun, "open backing file: %s\n", filename);
 	rc = 0;
 
+	wake_lock(&curlun->wake_lock);
+	printk(KERN_INFO "lock %s\n",curlun->wake_lock.name);
 out:
 	filp_close(filp, current->files);
 	return rc;
@@ -614,10 +702,28 @@ out:
 
 static void fsg_lun_close(struct fsg_lun *curlun)
 {
-	if (curlun->filp) {
+
+	int flag = 0;
+	if (curlun->is_chare_sd == 0){
+		if (curlun->filp && curlun->filp2) 
+			flag = 1;
+	}else{
+		if (curlun->filp) 
+			flag = 1;   
+	}
+	if (flag == 1){
 		LDBG(curlun, "close backing file\n");
 		fput(curlun->filp);
+		if (curlun->is_chare_sd == 0){
+			fput(curlun->filp2);
+		}
 		curlun->filp = NULL;
+
+		if (curlun->is_chare_sd == 0){
+			curlun->filp2 = NULL;
+		}
+		wake_unlock(&curlun->wake_lock);
+		printk(KERN_INFO "unlock %s\n",curlun->wake_lock.name);
 	}
 }
 

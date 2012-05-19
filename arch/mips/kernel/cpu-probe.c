@@ -74,6 +74,20 @@ void r4k_wait_irqoff(void)
 	return;
 }
 
+void JZ4770_wait_irqoff(void)
+{
+	local_irq_disable();
+	if (!need_resched())
+		__asm__("	.set	push		\n"
+			"	.set	mips3		\n"
+			"	sync			\n"
+			"	sync			\n"
+			"	wait			\n"
+			"	.set	pop		\n");
+	local_irq_enable();
+	return;
+}
+
 /*
  * The RM7000 variant has to handle erratum 38.  The workaround is to not
  * have any pending stores when the WAIT instruction is executed.
@@ -191,7 +205,11 @@ void __init check_wait(void)
 	case CPU_CAVIUM_OCTEON_PLUS:
 	case CPU_CAVIUM_OCTEON2:
 	case CPU_JZRISC:
+#ifdef CONFIG_SOC_JZ4770
+		cpu_wait = JZ4770_wait_irqoff;
+#else
 		cpu_wait = r4k_wait;
+#endif
 		break;
 
 	case CPU_RM7000:
@@ -1022,7 +1040,11 @@ static inline void cpu_probe_ingenic(struct cpuinfo_mips *c, unsigned int cpu)
 	switch (c->processor_id & 0xff00) {
 	case PRID_IMP_JZRISC:
 		c->cputype = CPU_JZRISC;
-		__cpu_name[cpu] = "Ingenic JZRISC";
+		__cpu_name[cpu] = "Ingenic Xburst";
+		c->isa_level = MIPS_CPU_ISA_M32R1;
+		c->tlbsize = 32;
+
+		c->ases |= MIPS_ASE_XBURSTMXU;
 		break;
 	default:
 		panic("Unknown Ingenic Processor ID!");

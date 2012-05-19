@@ -378,6 +378,10 @@ void __init mem_init(void)
 #error "CONFIG_HIGHMEM and CONFIG_DISCONTIGMEM dont work together yet"
 #endif
 	max_mapnr = highend_pfn;
+	if (highend_pfn < PFN_DOWN(HIGHMEM_START))
+		max_mapnr = max_low_pfn;
+	else
+		max_mapnr = highend_pfn;
 #else
 	max_mapnr = max_low_pfn;
 #endif

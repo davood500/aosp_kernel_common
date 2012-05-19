@@ -51,3 +51,8 @@ obj-$(CONFIG_KEYBOARD_TNETV107X)	+= tnetv107x-keypad.o
 obj-$(CONFIG_KEYBOARD_TWL4030)		+= twl4030_keypad.o
 obj-$(CONFIG_KEYBOARD_XTKBD)		+= xtkbd.o
 obj-$(CONFIG_KEYBOARD_W90P910)		+= w90p910_keypad.o
+
+obj-$(CONFIG_KEYBOARD_JZ_GPIO)		+= jz_gpio_keypad.o
+obj-$(CONFIG_JZ_REMOTE)			+= jz_remote.o
+obj-$(CONFIG_KEYBOARD_HA2605) += ha2605.o
+

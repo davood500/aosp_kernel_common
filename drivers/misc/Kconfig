@@ -20,6 +20,112 @@ menuconfig MISC_DEVICES
 
 if MISC_DEVICES
 
+choice
+	prompt "JZ_TCSM"
+	default JZ_TCSM_DEFAULT
+	help
+	Choose default or new method tcsm driver.
+
+config JZ_TCSM_DEFAULT
+	bool "JZ TCSM for multimedia(default)"
+	help
+	 tcsm with the old method, it cannot support for muti-thread.
+
+config JZ_TCSM_70LATER
+	bool "JZ TCSM for multimedia(muti-thread)"
+	help
+	 A more powerful tcsm driver with a new method that support muti-thread.
+
+endchoice
+
+config JZ_CIM
+	bool "JZ CIM for Camera driver"
+
+config OV3640
+	bool "OmniVision OV3640 sensor support (3.1 MegaPixel)"
+	depends on JZ_CIM
+config OV2655
+	bool "OmniVision OV2655 sensor support (2.0 MegaPixel)"
+	depends on JZ_CIM
+config CM3511 
+	bool "CM3511 sensor support (0.3 MegaPixel)"
+	depends on JZ_CIM
+config HI253
+	bool "HI253 sensor support (2.0 MegaPixel)"
+	depends on JZ_CIM
+config BF3703
+	bool "BF3703 sensor support (0.3 MegaPixel)"
+	depends on JZ_CIM
+config GC0307
+	bool "GC0307 sensor support (0.3 MegaPixel)"
+	depends on JZ_CIM
+config GC0308
+	bool "GC0308 sensor support (0.3 MegaPixel)"
+	depends on JZ_CIM
+config GC0308_MIRROR
+	bool "GC0308 sensor mirror effect to support front facing"
+	depends on GC0308
+config GC0308_VMIRROR
+	bool "GC0308 sensor mirror effect to support front facing"
+	depends on GC0308
+config GC0309
+	bool "gc0309 sensor support (0.3 MegaPixel)"
+	depends on JZ_CIM
+config GC2015
+	bool "gc2015 sensor support (2.0 MegaPixel)"
+	depends on JZ_CIM
+config GT2005
+	bool "gt2005 sensor support (2.0 MegaPixel)"
+	depends on JZ_CIM
+config GT2005_MIRROR
+	bool "GT2005 sensor mirror effect to support front facing"
+	depends on GT2005
+config OV2640
+	bool "OmniVision OV2640 sensor support (2.0 MegaPixel)"
+	depends on JZ_CIM
+config OV9650
+	bool "OmniVision OV9650 sensor support (1.3 MegaPixel)"
+	depends on JZ_CIM
+config OV7690
+	bool "OmniVision OV7690 sensor support (0.3 MegaPixel)"
+	depends on JZ_CIM
+#fish mark YanZengTing add cm3511_camera on 2010.5.19
+config CM3511
+	bool "cm3511 sensor support (0.3 MegaPixel)"
+	depends on JZ_CIM
+#fish add ov2655_camera on 2010.5.19
+config OV2655_Z800
+	bool "z800 use ov2655 sensor support (2.0 MegaPixel)"
+	depends on JZ_CIM
+
+config F2655
+	bool "f2655 with focus function sensor support (2.0 MegaPixel)"
+	depends on JZ_CIM
+
+config CM3511_Z800
+	bool "z800 cm3511 sensor support (0.3 MegaPixel)"
+	depends on JZ_CIM
+
+#fish add hi704 on 2010.8.1
+config HI704
+	bool "hi704 sensor support (0.3 MegaPixel)"
+	depends on JZ_CIM
+
+config  OV7675
+        bool"ov7675 sensor support (0.3 MegaPixel)"
+        depends on JZ_CIM
+
+config  SIV120B
+        bool"SIV120B sensor support (0.3 MegaPixel)"
+        depends on JZ_CIM
+
+config ISP
+	bool "Corelogic isp with SamSung S5K sensor support (3.1 MegaPixel)"
+	depends on JZ_CIM && JZ_I2C_SIMULATE
+config JZ_FAKE_SENSOR 
+	bool "jz fake sensor support (3.1 MegaPixel)"
+	depends on JZ_CIM
+
 config AD525X_DPOT
 	tristate "Analog Devices Digital Potentiometers"
 	depends on (I2C || SPI) && SYSFS
@@ -60,6 +166,12 @@ config AD525X_DPOT_SPI
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called ad525x_dpot-spi.
+
+config BTL_TS
+        bool "Support ISDB-T 1-seg module on jz4770"
+	depends on I2C
+	help
+	  This module is used in jz4770_linden111, ISDB-T 1-seg module, as btl_ts.
 
 config ANDROID_PMEM
 	bool "Android pmem allocator"

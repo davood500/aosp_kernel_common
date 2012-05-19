@@ -46,6 +46,10 @@
 
 #include "queue.h"
 
+#ifdef CONFIG_USB_ANDROID_CHARSD
+#include <asm/jzmmc/jz_mmc_charsd.h>
+#include <asm/jzmmc/jz_mmc_host.h>
+#endif
 MODULE_ALIAS("mmc:block");
 #ifdef MODULE_PARAM_PREFIX
 #undef MODULE_PARAM_PREFIX
@@ -76,6 +80,9 @@ static int max_devices;
 /* 256 minors, so at most 256 separate devices */
 static DECLARE_BITMAP(dev_use, 256);
 static DECLARE_BITMAP(name_use, 256);
+#ifdef CONFIG_USB_ANDROID_CHARSD
+extern struct charsd_dev *jz_charsd_devp;
+#endif
 
 /*
  * There is one mmc_blk_data per slot.
@@ -827,6 +834,15 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
 	struct mmc_blk_request brq;
 	int ret = 1, disable_multi = 0, retry = 0;
 
+#ifdef CONFIG_USB_ANDROID_CHARSD
+	struct jz_mmc_host *host = mmc_priv(card->host);
+	struct charsd_dev *devp = host->devp;
+#endif
+
+#ifdef CONFIG_USB_ANDROID_CHARSD
+	if(devp)
+		down(&devp->sem);
+#endif
 	/*
 	 * Reliable writes are used to implement Forced Unit Access and
 	 * REQ_META accesses, and are supported only on MMCs.
@@ -981,9 +997,15 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
 		 * has been transferred.
 		 */
 		if (brq.cmd.resp[0] & CMD_ERRORS) {
+			printk("******Waring: If you see me here, please tell ykli(010-82826661-1143) as soon as possible!!!!!!******\n");
+			printk("------>opcode = %d\n", brq.cmd.opcode);
+			printk("------>arg = 0x%08X\n", brq.cmd.arg);
+			printk("------>sg_num = %d\n", brq.data.sg_len);
+			printk("------>blocks = %d\n", brq.data.blocks);
 			pr_err("%s: r/w command failed, status = %#x\n",
 				req->rq_disk->disk_name, brq.cmd.resp[0]);
-			goto cmd_abort;
+//This flag bit was not detected on 2.6.32. But it occur here will lead to a terrible result. 
+//			goto cmd_abort;
 		}
 
 		/*
@@ -1047,6 +1069,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
 		spin_unlock_irq(&md->lock);
 	} while (ret);
 
+#ifdef CONFIG_USB_ANDROID_CHARSD
+	if (devp && (host->trans_state < MSC_CARD_ALAL))
+		up(&devp->sem);
+#endif
+
 	return 1;
 
  cmd_err:
@@ -1072,12 +1099,22 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
 		ret = __blk_end_request(req, 0, brq.data.bytes_xfered);
 		spin_unlock_irq(&md->lock);
 	}
+	
+#ifdef CONFIG_USB_ANDROID_CHARSD
+	if(devp)
+		up(&devp->sem);
+#endif
 
  cmd_abort:
 	spin_lock_irq(&md->lock);
 	while (ret)
 		ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
 	spin_unlock_irq(&md->lock);
+
+#ifdef CONFIG_USB_ANDROID_CHARSD
+	if(devp)
+		up(&devp->sem);
+#endif
 
 	return 0;
 }
@@ -1205,8 +1242,10 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
 	 * messages to tell when the card is present.
 	 */
 
+//	snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
+//		 "mmcblk%d%s", md->name_idx, subname ? subname : "");
 	snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
-		 "mmcblk%d%s", md->name_idx, subname ? subname : "");
+		 "mmcblk%d%s", card->host->index, subname ? subname : "");
 
 	blk_queue_logical_block_size(md->queue.queue, 512);
 	set_capacity(md->disk, size);
@@ -1404,6 +1443,11 @@ static int mmc_blk_probe(struct mmc_card *card)
 	struct mmc_blk_data *md, *part_md;
 	int err;
 	char cap_str[10];
+#ifdef CONFIG_USB_ANDROID_CHARSD
+	unsigned char i = 0;
+	struct jz_mmc_host *host = mmc_priv(card->host);
+	struct charsd_dev *devp = NULL;
+#endif
 
 	/*
 	 * Check that the card supports the command class(es) we need.
@@ -1414,6 +1458,31 @@ static int mmc_blk_probe(struct mmc_card *card)
 	md = mmc_blk_alloc(card);
 	if (IS_ERR(md))
 		return PTR_ERR(md);
+#ifdef CONFIG_USB_ANDROID_CHARSD
+	if(card->type < 2) {
+		for (i = 0; i < NUMBER_OF_CHARSD; i++) {
+  			devp = &jz_charsd_devp[i];
+  			if(!devp->used) {
+ 				devp->rca = card->rca;
+ 				devp->host = host;
+  				devp->used = 1;
+  				devp->pdev_id = host->pdev_id;
+				host->devp = devp;
+  				memset(devp->uminor, 0, ARRAY_SIZE(devp->uminor) * sizeof(struct uminor));
+				if (mmc_card_blockaddr(card))
+  					devp->ishc = 1;
+				else
+					devp->ishc = 0;
+				break;
+  			} else if (i == (NUMBER_OF_CHARSD - 1)) {
+  				devp = NULL;
+ 				printk("Charsd: Warning!No Charsd for this card(id=%d)!",host->pdev_id);
+  			}
+ 		}
+		if (devp == NULL)
+ 			printk("Warning: Can u tolerate a card without powerful devp?\n");
+   		}
+#endif
 
 	err = mmc_blk_set_blksize(md, card);
 	if (err)
@@ -1441,6 +1510,15 @@ static int mmc_blk_probe(struct mmc_card *card)
 		if (mmc_add_disk(part_md))
 			goto out;
 	}
+#ifdef CONFIG_USB_ANDROID_CHARSD
+	if (devp) {
+		for (i = 0; i < md->disk->part_tbl->len; i++) {
+ 			devp->uminor[i].minor = md->disk->first_minor + i;
+			devp->uminor[i].partition_start_addr = md->disk->part_tbl->part[i]->start_sect * 512;
+			devp->uminor[i].used = 1;
+		}
+	}
+#endif
 	return 0;
 
  out:
@@ -1452,12 +1530,24 @@ static int mmc_blk_probe(struct mmc_card *card)
 static void mmc_blk_remove(struct mmc_card *card)
 {
 	struct mmc_blk_data *md = mmc_get_drvdata(card);
+#ifdef CONFIG_USB_ANDROID_CHARSD
+	struct jz_mmc_host *host = mmc_priv(card->host);
+	struct charsd_dev *devp;
+#endif
 
 	mmc_blk_remove_parts(card, md);
 	mmc_claim_host(card->host);
 	mmc_blk_part_switch(card, md);
 	mmc_release_host(card->host);
 	mmc_blk_remove_req(md);
+#ifdef CONFIG_USB_ANDROID_CHARSD
+	if (host->devp) {
+		devp = host->devp;
+		devp->host = NULL;
+		devp->used = 0;
+		host->devp = NULL;
+	}
+#endif
 	mmc_set_drvdata(card, NULL);
 #ifdef CONFIG_MMC_BLOCK_DEFERRED_RESUME
 	mmc_set_bus_resume_policy(card->host, 0);

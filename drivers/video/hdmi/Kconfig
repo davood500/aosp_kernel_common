@@ -1,0 +1,28 @@
+config FB_JZ47XX_HDMI_CAPTION
+    bool "JZ47XX_HDMI_CAPTION support"
+	depends on JZ47XX_HDMI
+    ---help---
+    If your device has a hdmi interface you can select it.It is used for
+    support hdmi caption. 
+
+choice
+    depends on JZ47XX_HDMI
+    prompt  "HDMI Chip Select"
+
+config HDMI_IT6610
+	bool "HDMI IT6610"
+config HDMI_HOTPLUG_MODE
+	depends on HDMI_IT6610
+	bool "HDMI hotplug mode"
+	default y
+config HDMI_HOTPLUG_HPD_CONNECT_LOW_ACTIVE
+	depends on HDMI_HOTPLUG_MODE
+	bool "HDMI connection is low active"
+	default y
+#source "drivers/video/hdmi/it6610/Kconfig"
+config HDMI_EP932
+	bool "HDMI EP932"
+config HDMI_NULL
+	bool "NULL"
+
+endchoice

@@ -336,7 +336,7 @@ static int __init ram_console_early_init(void)
 		ram_console_old_log_init_buffer);
 }
 #else
-static int ram_console_driver_probe(struct platform_device *pdev)
+static int __init ram_console_driver_probe(struct platform_device *pdev)
 {
 	struct resource *res = pdev->resource;
 	size_t start;
@@ -367,7 +367,7 @@ static int ram_console_driver_probe(struct platform_device *pdev)
 	return ram_console_init(buffer, buffer_size, bootinfo, NULL/* allocate */);
 }
 
-static struct platform_driver ram_console_driver = {
+static __refdata struct platform_driver ram_console_driver = {
 	.probe = ram_console_driver_probe,
 	.driver		= {
 		.name	= "ram_console",

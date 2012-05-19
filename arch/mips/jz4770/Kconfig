@@ -1,0 +1,150 @@
+choice
+	prompt "JZ4770 board selection"
+	depends on SOC_JZ4770
+	default JZ4770_ALTAIR
+
+config JZ4770_TVB
+        bool "Ingenic JZ4770 TVB board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+
+config JZ4770_N55
+        bool "Ingenic JZ4770 N55 board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+	
+config JZ4770_LINDEN
+        bool "Ingenic JZ4770 Linden board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+
+config LINDEN_V_1_0
+        bool "Ingenic JZ4770 LINDEN v1.0 board"
+	depends on JZ4770_LINDEN
+
+config LINDEN_V_1_1
+        bool "Ingenic JZ4770 LINDEN v1.1 board"
+	depends on JZ4770_LINDEN
+
+config JZ4770_LINDEN111
+        bool "Ingenic JZ4770 Linden v1.1.1 board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+
+config JZ4770_NPM701
+        bool "Ingenic JZ4770 NPM701 board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+
+config NPM701_V_1_0
+        bool "Ingenic JZ4770 NPM701 v1.0 board"
+	depends on JZ4770_NPM701
+
+config NPM701_V_1_1
+        bool "Ingenic JZ4770 NPM701 v1.1 board"
+	depends on JZ4770_NPM701
+config JZ4770_NPM702
+        bool "Ingenic JZ4770 NPM702 board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+
+config JZ4770_NPM703
+        bool "Ingenic JZ4770 NPM703 board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+
+config JZ4770_O1
+        bool "Ingenic JZ4770 o1 board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+
+config JZ4770_COBY7022
+        bool "Ingenic JZ4770 coby7022 board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+
+config JZ4770_AURORA
+        bool "Ingenic JZ4770 AURORA board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+
+config JZ4770_PS47
+        bool "Ingenic JZ4770 PS47 board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+
+config JZ4770_PI3800
+        bool "Ingenic JZ4770 pi3800 board"
+        select DMA_NONCOHERENT
+        select SYS_HAS_CPU_MIPS32_R1
+        select SYS_SUPPORTS_32BIT_KERNEL
+        select SYS_SUPPORTS_LITTLE_ENDIAN
+        select SYS_HAS_EARLY_PRINTK
+
+config JZ4770_TABLET_7_HD_C 
+        bool "Ingenic JZ4770 Tablet_7_HD_C board"
+        select DMA_NONCOHERENT
+        select SYS_HAS_CPU_MIPS32_R1
+        select SYS_SUPPORTS_32BIT_KERNEL
+        select SYS_SUPPORTS_LITTLE_ENDIAN
+        select SYS_HAS_EARLY_PRINTK
+
+config JZ4770_JB01
+        bool "Ingenic JZ4770 JB01 board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+	
+config JZ4770_PISCES
+        bool "Ingenic JZ4770 PISCES board"
+	select DMA_NONCOHERENT
+	select SYS_HAS_CPU_MIPS32_R1
+	select SYS_SUPPORTS_32BIT_KERNEL
+	select SYS_SUPPORTS_LITTLE_ENDIAN
+	select SYS_HAS_EARLY_PRINTK
+
+
+endchoice
+
+config NAND_DEVICE_ID
+       depends on SOC_JZ4770
+       bool "Support read device ID from NAND Flash"
+
+config ANDROID_CTS
+       depends on SOC_JZ4770
+       bool "Support FOR ANDROID PRODUCT CTS"

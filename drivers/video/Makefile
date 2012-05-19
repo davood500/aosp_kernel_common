@@ -162,3 +162,17 @@ obj-$(CONFIG_FB_VIRTUAL)          += vfb.o
 
 #video output switch sysfs driver
 obj-$(CONFIG_VIDEO_OUTPUT_CONTROL) += output.o
+
+#video for ingenic lcd
+obj-$(CONFIG_JZSOC_BOOT_LOGO) 			+= logo.o
+
+obj-$(CONFIG_FB_JZ47XX_ANDROID_TFT)       	+= jz47xx_android_lcd.o panel/
+obj-$(CONFIG_FB_JZ47XX_ANDROID_TFT)       	+= jz47xx_hdmi.o
+obj-$(CONFIG_FB_JZ47XX_ANDROID_IPU)       	+= jz47xx_android_ipu.o
+obj-$(CONFIG_FB_JZ47XX_ANDROID_SLCD)       	+= jz47xx_slcd.o
+obj-$(CONFIG_FB_JZ47XX_TVE)       		+= jz47xx_tve.o
+
+obj-$(CONFIG_JZ47XX_HDMI) 			+= hdmi/
+
+obj-$(CONFIG_JZ47XX_AOSDC)    			+= jz47xx_aosd.o
+obj-y  						+= jz47xx_lcd_swapbuffer_counter.o
